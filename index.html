@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCAO-F Practice Quiz</title>
+<script src="questions.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232636;
+    --border: #2e3147;
+    --text: #e8eaf0;
+    --text-dim: #8b8fa8;
+    --accent: #6c72f5;
+    --accent-dim: #3d4196;
+    --green: #2ecc71;
+    --green-bg: #0d2b1a;
+    --red: #e74c3c;
+    --red-bg: #2b0d0d;
+    --yellow: #f39c12;
+    --selected-bg: #1e2040;
+    --danger-bg: #4a1515;
+    --warn-bg: #2a1f00;
+    --warn-border: #5c4300;
+    --warn-text: #f5c842;
+    color-scheme: dark;
+  }
+
+  [data-theme="light"] {
+    --bg: #f4f5fa;
+    --surface: #ffffff;
+    --surface2: #eceef6;
+    --border: #d3d7e6;
+    --text: #1b1e2e;
+    --text-dim: #565b73;
+    --accent: #4f56e6;
+    --accent-dim: #a7abf3;
+    --green: #1b8f4e;
+    --green-bg: #e1f5e9;
+    --red: #c7372a;
+    --red-bg: #fbe0dd;
+    --yellow: #a85f00;
+    --selected-bg: #e5e7fc;
+    --danger-bg: #fdecea;
+    --warn-bg: #fff4d6;
+    --warn-border: #e2c46f;
+    --warn-text: #7a5600;
+    color-scheme: light;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Disclaimer */
+  #disclaimer {
+    position: relative;
+    background: var(--warn-bg);
+    border-bottom: 1px solid var(--warn-border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--warn-text);
+  }
+  #disclaimer.hidden { display: none; }
+  #disclaimer p { flex: 1; }
+  #disclaimer button {
+    background: none;
+    border: 1px solid var(--warn-text);
+    color: var(--warn-text);
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Layout */
+  #app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px 16px 64px;
+  }
+
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:not(:disabled):hover { opacity: 0.85; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:not(:disabled):hover { background: var(--border); }
+  .btn-danger { background: var(--danger-bg); color: var(--red); border: 1px solid var(--red); }
+  .btn-danger:hover { background: var(--red-bg); }
+  :root:not([data-theme="light"]) .btn-danger { background: #d62f2f; border-color: #ff6b5e; color: #fff; font-weight: 600; }
+  :root:not([data-theme="light"]) .btn-danger:hover { background: #ef4444; }
+
+  /* Start screen */
+  #start-screen .subtitle {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+  .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  @media (max-width: 500px) { .mode-cards { grid-template-columns: 1fr; } }
+  .mode-card {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .mode-card:hover { border-color: var(--accent-dim); background: var(--surface2); }
+  .mode-card.selected { border-color: var(--accent); background: var(--selected-bg); }
+  .mode-card h3 { font-size: 16px; margin-bottom: 6px; }
+  .mode-card p { font-size: 13px; color: var(--text-dim); }
+  .resume-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .resume-box p { font-size: 14px; color: var(--text-dim); margin-bottom: 12px; }
+  .resume-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .start-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  /* Question screen */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .timer-row { display: inline-flex; align-items: center; gap: 10px; }
+  .timer-row .btn { padding: 4px 12px; border-radius: 99px; font-size: 13px; }
+  .question-text {
+    white-space: pre-line;
+    font-size: 17px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .option-label:has(input:checked) { border-color: var(--accent); background: var(--selected-bg); }
+  .option-label:hover:not(.locked) { border-color: var(--accent-dim); background: var(--surface2); }
+  .option-label.correct { border-color: var(--green) !important; background: var(--green-bg) !important; }
+  .option-label.incorrect { border-color: var(--red) !important; background: var(--red-bg) !important; }
+  .option-label input[type=radio], .option-label input[type=checkbox] { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
+  .option-letter {
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    min-width: 18px;
+  }
+  .option-label.correct .option-letter { color: var(--green); }
+  .option-label.incorrect .option-letter { color: var(--red); }
+  .tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .option-row { display: block; }
+  .option-label.struck .option-text { text-decoration: line-through; opacity: 0.55; }
+  .strike-btn { flex-shrink: 0; align-self: center; margin-left: auto; min-width: 34px; height: 28px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-dim); cursor: pointer; line-height: 1; transition: border-color 0.15s, background 0.15s, color 0.15s; }
+  .strike-ab { position: relative; display: inline-block; font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 1px; padding: 0 1px; pointer-events: none; }
+  .strike-ab::after { content: ''; position: absolute; left: -1px; right: -1px; top: 62%; height: 1.5px; background: currentColor; }
+  .strike-btn:hover:not(:disabled) { border-color: var(--accent-dim); color: var(--text); }
+  .strike-btn.on { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .strike-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .next-hint { margin: 0 0 24px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--yellow); border-left-width: 3px; color: var(--yellow); font-size: 14px; }
+  .tag { font-size:12px; padding:3px 10px; border-radius:99px; background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); }
+  .tag.multi { border-color:var(--yellow); color:var(--yellow); }
+  .domain-pick { margin-bottom: 24px; }
+  .domain-pick h3 { font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 8px; }
+  .domain-list { display: grid; gap: 6px; margin-bottom: 20px; }
+  .domain-list label { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; padding: 8px 12px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); cursor: pointer; }
+  .domain-list label.all { font-weight: 600; }
+  .domain-list input { margin-top: 3px; }
+  .count-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 14px; color: var(--text-dim); }
+  .count-row input { width: 110px; padding: 8px 10px; font-size: 15px; border-radius: 8px; background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .domain-warn { color: var(--red); font-size: 13px; margin-top: 8px; }
+  .timer { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .timer.low { color: var(--red); }
+  .mode-cards.three { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 640px) { .mode-cards.three { grid-template-columns: 1fr; } }
+  .domain-row { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .domain-row:last-child { border-bottom:none; }
+  .domain-row .pct.ok { color:var(--green); font-weight:600; }
+  .domain-row .pct.low { color:var(--red); font-weight:600; }
+  .explanation {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    display: none;
+  }
+  .explanation.visible { display: block; }
+  .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .remaining-label { font-size: 13px; color: var(--text-dim); margin-left: auto; }
+
+  /* Summary screen */
+  .summary-list { list-style: none; }
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .summary-item:last-child { border-bottom: none; }
+  .summary-qnum { color: var(--text-dim); min-width: 28px; font-size: 13px; }
+  .summary-qtext { flex: 1; }
+  .summary-ans { font-weight: 600; color: var(--accent); min-width: 40px; text-align: right; }
+  .summary-ans.unanswered { color: var(--red); }
+  .summary-actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Results screen */
+  .score-card {
+    text-align: center;
+    padding: 32px;
+  }
+  .score-big { font-size: 56px; font-weight: 800; color: var(--accent); }
+  .score-sub { font-size: 16px; color: var(--text-dim); margin-top: 4px; }
+  .results-list { list-style: none; }
+  .result-item {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-item:last-child { border-bottom: none; }
+  .result-qtext { white-space: pre-line; font-size: 15px; line-height: 1.5; margin-bottom: 10px; }
+  .result-answers { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; margin-bottom: 8px; }
+  .result-ans-label { color: var(--text-dim); }
+  .result-correct-ans { color: var(--green); font-weight: 600; }
+  .result-user-ans.right { color: var(--green); }
+  .result-user-ans.wrong { color: var(--red); }
+  .result-explanation { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .results-actions { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .results-load-more { text-align: center; padding: 16px 0; }
+  .flag-btn { margin-left: auto; font-size: 13px; padding: 4px 12px; border-radius: 99px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; }
+  .flag-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+  .flag-btn.on { border-color: var(--yellow); color: var(--yellow); font-weight: 600; }
+  .tag.flag { border-color: var(--yellow); color: var(--yellow); }
+  .summary-flag { color: var(--yellow); min-width: 14px; font-size: 14px; }
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .filter-btn { padding: 8px 14px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 14px; }
+  .filter-btn:hover { border-color: var(--accent-dim); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-note { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+  .empty-note { padding: 20px 0; text-align: center; color: var(--text-dim); font-size: 14px; }
+  #topbar { max-width: 800px; margin: 0 auto; padding: 12px 16px 0; display: flex; justify-content: flex-end; }
+  #topbar { align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  #topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start; }
+  #topbar-actions .btn { padding: 6px 14px; border-radius: 99px; font-size: 13px; }
+  #theme-toggle { padding: 6px 14px; margin-left: auto; flex-shrink: 0; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px; }
+  #theme-toggle:hover { border-color: var(--accent-dim); }
+  #theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#count-input::-webkit-outer-spin-button,#count-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+#count-input{-moz-appearance:textfield;appearance:textfield}
+</style>
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ccao_quiz_theme');
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<div id="disclaimer">
+  <p>⚠️ <strong>Disclaimer:</strong> This is an unofficial practice quiz. Questions come from Matthew Purcell&rsquo;s practice PDFs on LinkedIn and are not actual exam content. Use for study purposes only.</p>
+  <button onclick="dismissDisclaimer()">Dismiss</button>
+</div>
+
+<div id="topbar"><span id="topbar-actions"></span><button id="theme-toggle" type="button" aria-label="Switch to Light Mode" title="Switch to Light Mode" onclick="toggleTheme()">&#9728; Light Mode</button></div>
+<div id="app"></div>
+
+<script>
+const STORAGE_KEY = 'ccao_quiz_state_v4_120';
+const QUIZ_SIZE = QUESTIONS.length;
+// Mock exam: 60 questions in 120 minutes, drawn per domain at the blueprint weights (14/21/12/16/12/15/10%).
+const MOCK_MINUTES = 120;
+const MAX_PAUSES = 4; // total pauses allowed per mock exam
+const MOCK_COUNTS = { 1: 8, 2: 13, 3: 7, 4: 10, 5: 7, 6: 9, 7: 6 };
+const MODE_LABELS = { immediate: 'Immediate Feedback', later: 'Review at End', mock: 'Mock Exam' };
+
+function pickMock() {
+  let ids = [];
+  Object.keys(MOCK_COUNTS).forEach(d => {
+    const pool = shuffle(QUESTIONS.filter(q => String(q.domain) === String(d)));
+    ids = ids.concat(pool.slice(0, MOCK_COUNTS[d]).map(q => q.id));
+  });
+  return shuffle(ids);
+}
+
+function fmtTime(ms) {
+  const t = Math.max(0, Math.round(ms / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+  return h + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+function timerHtml() {
+  if (!state || !state.mock || state.submitted) return '';
+  const left = state.deadline - (state.pausedAt || Date.now());
+  return `<span id="timer" class="timer${left < 10 * 60000 ? ' low' : ''}">Time left ${fmtTime(left)}</span>`;
+}
+
+// --- Pause (mock exam only, limited to MAX_PAUSES uses) ---
+function pausesLeft() { return MAX_PAUSES - (state.pausesUsed || 0); }
+
+function pauseBtnHtml() {
+  if (!state || !state.mock || state.submitted) return '';
+  const left = pausesLeft();
+  return `<button class="btn btn-secondary" onclick="pauseExam()" ${left <= 0 ? 'disabled' : ''}>${left > 0 ? 'Pause Timer (' + left + ' of ' + MAX_PAUSES + ' Left)' : 'No Pauses Left'}</button>`;
+}
+
+function timerRowHtml() {
+  if (!state || !state.mock || state.submitted) return '';
+  return `<span class="timer-row">${timerHtml()}${pauseBtnHtml()}</span>`;
+}
+
+function pauseExam() {
+  if (!state || !state.mock || state.submitted || state.pausedAt || pausesLeft() <= 0) return;
+  if (state.deadline - Date.now() <= 0) return;
+  state.pausedAt = Date.now();
+  state.pausesUsed = (state.pausesUsed || 0) + 1;
+  saveState();
+  render();
+}
+
+function resumeExam() {
+  if (!state || !state.pausedAt) return;
+  const paused = Date.now() - state.pausedAt;
+  state.deadline += paused;
+  state.pausedTotal = (state.pausedTotal || 0) + paused;
+  state.pausedAt = null;
+  saveState();
+  render();
+}
+
+function renderPaused() {
+  const left = pausesLeft();
+  return `
+    <div class="card score-card">
+      <h2 style="margin-bottom:8px">Exam paused</h2>
+      <div class="score-sub">${timerHtml()}</div>
+      <p style="color:var(--text-dim);font-size:14px;margin:16px 0">The clock is stopped and the questions are hidden until you resume. ${left > 0 ? `You have ${left} of ${MAX_PAUSES} pauses left after this one.` : 'This was your last pause.'}</p>
+      <button class="btn btn-primary" onclick="resumeExam()">Resume exam</button>
+    </div>
+  `;
+}
+
+function tick() {
+  if (!state || !state.mock || state.submitted || state.pausedAt) return;
+  const left = state.deadline - Date.now();
+  if (left <= 0) { state.timedOut = true; submitAll(); return; }
+  const el = document.getElementById('timer');
+  if (el) { el.textContent = 'Time left ' + fmtTime(left); el.classList.toggle('low', left < 10 * 60000); }
+}
+setInterval(tick, 1000);
+
+// --- Theme (dark by default, choice saved separately from quiz progress) ---
+const THEME_KEY = 'ccao_quiz_theme';
+function currentTheme() {
+  const root = document.documentElement;
+  return root && root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+}
+function updateThemeButton() {
+  const b = document.getElementById('theme-toggle');
+  if (!b) return;
+  const light = currentTheme() === 'light';
+  b.textContent = light ? '\u263E Dark Mode' : '\u2600 Light Mode'; // shows the mode you would switch to
+  if (b.setAttribute) { b.setAttribute('aria-label', light ? 'Switch to Dark Mode' : 'Switch to Light Mode'); b.setAttribute('title', light ? 'Switch to Dark Mode' : 'Switch to Light Mode'); }
+}
+function toggleTheme() {
+  const next = currentTheme() === 'light' ? 'dark' : 'light';
+  if (document.documentElement) document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  updateThemeButton();
+}
+updateThemeButton();
+
+// --- Disclaimer ---
+(function() {
+  if (sessionStorage.getItem('disclaimer_dismissed')) {
+    document.getElementById('disclaimer').classList.add('hidden');
+  }
+})();
+
+function dismissDisclaimer() {
+  sessionStorage.setItem('disclaimer_dismissed', '1');
+  document.getElementById('disclaimer').classList.add('hidden');
+}
+
+// --- State ---
+let state = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function clearState() {
+  localStorage.removeItem(STORAGE_KEY);
+  state = null;
+}
+
+// --- Fisher-Yates shuffle ---
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickQuestions(excludeIds, count) {
+  const pool = QUESTIONS.filter(q => !excludeIds.has(q.id) && selectedDomains.has(String(q.domain)));
+  // Always a random draw: shuffle the pool, then take the first `count`.
+  let picked = shuffle(pool).slice(0, count);
+  // "Domain order" presents that random selection grouped by domain, in bank order.
+  if (selectedOrder !== 'shuffled') picked.sort((a, b) => a.id - b.id);
+  return picked.map(q => q.id);
+}
+
+// --- Letter to index ---
+function letterToIndex(letter) {
+  return letter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+}
+
+function indexToLetter(i) {
+  return String.fromCharCode(65 + i);
+}
+
+function asArray(a) { return a === undefined ? [] : (Array.isArray(a) ? a : [a]); }
+function correctArray(q) { return asArray(q.correctAnswer); }
+function isCorrect(q, ans) {
+  const a = asArray(ans).slice().sort().join(',');
+  return a !== '' && a === correctArray(q).slice().sort().join(',');
+}
+function ansLabel(ans) { return asArray(ans).slice().sort().join(', '); }
+function isComplete(q, ans) { return asArray(ans).length === correctArray(q).length; }
+
+function getQuestion(id) {
+  return QUESTIONS.find(q => q.id === id);
+}
+
+// --- Mark for review ---
+function isFlagged(id) { return !!(state && state.flagged && state.flagged[id]); }
+function flaggedCount() { return state.questionIds.filter(isFlagged).length; }
+function toggleFlag(id) {
+  nextHintId = null;
+  if (!state.flagged) state.flagged = {};
+  if (state.flagged[id]) delete state.flagged[id]; else state.flagged[id] = true;
+  saveState();
+  render();
+}
+function goToNextMarked() {
+  const ids = state.questionIds, n = ids.length;
+  for (let k = 1; k < n; k++) {
+    const i = (state.currentIndex + k) % n; // wraps round to the start
+    if (isFlagged(ids[i])) { goToQuestion(i); return; }
+  }
+}
+function backToReview() {
+  state.screen = 'summary';
+  saveState();
+  render();
+}
+function goToFirstMarked() {
+  const i = state.questionIds.findIndex(isFlagged);
+  if (i >= 0) goToQuestion(i);
+}
+
+// --- Render ---
+function renderTopbarActions() {
+  const inQuiz = state && (state.screen === 'question' || state.screen === 'summary') && !(state.mock && state.pausedAt && !state.submitted);
+  return inQuiz ? '<button class="btn btn-danger" onclick="confirmReset()">Reset</button>' : '';
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const tb = document.getElementById('topbar-actions');
+  if (tb) tb.innerHTML = renderTopbarActions();
+  if (!state || state.screen === 'start') {
+    app.innerHTML = renderStart();
+  } else if (state.mock && state.pausedAt && !state.submitted) {
+    app.innerHTML = renderPaused();
+  } else if (state.screen === 'question') {
+    app.innerHTML = renderQuestion();
+  } else if (state.screen === 'summary') {
+    app.innerHTML = renderSummary();
+  } else if (state.screen === 'results') {
+    app.innerHTML = renderResults();
+  }
+  attachHandlers();
+}
+
+// --- Start screen ---
+function renderStart() {
+  const saved = loadState();
+  const hasSave = saved && saved.screen !== 'start';
+  const resumeHtml = hasSave ? `
+    <div class="resume-box">
+      <p>You have a saved quiz (${saved.mock ? MODE_LABELS.mock : MODE_LABELS[saved.mode]}, ${domainLabel(saved.domainFilter)}Q${(saved.currentIndex||0)+1}/${saved.questionIds.length}${saved.mock && !saved.submitted ? (saved.pausedAt ? ', currently paused' : ', the clock has kept running') : ''}). Resume or start fresh?</p>
+      <div class="resume-actions">
+        <button class="btn btn-primary" onclick="resumeQuiz()">Resume</button>
+        <button class="btn btn-secondary" onclick="newQuiz()">New Quiz</button>
+      </div>
+    </div>
+  ` : '';
+
+  return `
+    <h1>Claude Certified Associate Foundations Practice Quiz</h1>
+    <p class="subtitle" style="color:var(--text-dim);margin-bottom:24px;">A bank of ${QUESTIONS.length} questions across the seven exam domains, at the blueprint weights. Practise the full bank, or sit a timed 60-question mock exam. Aim for 75% or better in every domain.</p>
+    ${resumeHtml}
+    ${hasSave ? '' : `
+    <div class="mode-cards three">
+      <div class="mode-card selected" id="mode-immediate" onclick="selectMode('immediate')">
+        <h3>Immediate Feedback</h3>
+        <p>See correct answer and explanation after each question.</p>
+      </div>
+      <div class="mode-card" id="mode-later" onclick="selectMode('later')">
+        <h3>Review at End</h3>
+        <p>Answer every question, then see results on a summary screen.</p>
+      </div>
+      <div class="mode-card" id="mode-mock" onclick="selectMode('mock')">
+        <h3>Mock Exam</h3>
+        <p>60 questions drawn at the exam's domain weights, shuffled, ${MOCK_MINUTES} minutes on the clock, results at the end.</p>
+      </div>
+    </div>
+    <div class="mode-cards" id="order-cards">
+      <div class="mode-card selected" id="order-exam" onclick="selectOrder('exam')">
+        <h3>Domain order</h3>
+        <p>Your selection shown grouped by domain, 1 to 7.</p>
+      </div>
+      <div class="mode-card" id="order-shuffled" onclick="selectOrder('shuffled')">
+        <h3>Shuffled</h3>
+        <p>Your selection shown in random order.</p>
+      </div>
+    </div>
+    <div class="domain-pick" id="domain-pick"${selectedMode === 'mock' ? ' style="display:none"' : ''}>
+      <h3>Domains to include</h3>
+      <div class="domain-list">
+        <label class="all"><input type="checkbox" id="dom-all" ${selectedDomains.size === ALL_DOMAINS.length ? 'checked' : ''} onchange="toggleAllDomains(this.checked)"><span>All domains (${QUESTIONS.length} questions)</span></label>
+        ${ALL_DOMAINS.map(d => `<label><input type="checkbox" id="dom-${d}" ${selectedDomains.has(d) ? 'checked' : ''} onchange="toggleDomain('${d}', this.checked)"><span>Domain ${d}: ${escHtml(DOMAINS[d])} (${domainCount(d)} questions)</span></label>`).join('')}
+      </div>
+      <h3>Number of questions</h3>
+      <div class="count-row">
+        <input type="number" id="count-input" min="1" max="${poolSize()}" step="1" value="${selectedCount || ''}" placeholder="All ${poolSize()}" oninput="setCount(this.value)" onchange="this.value = selectedCount || ''">
+        <span id="count-avail">of ${poolSize()} available. Leave blank for all. A smaller number is drawn at random from the selected domains.</span>
+      </div>
+      <div class="domain-warn" id="domain-warn" style="display:${poolSize() ? 'none' : 'block'}">Select at least one domain to start.</div>
+    </div>
+    <div class="start-actions">
+      <button class="btn btn-primary" id="start-btn" onclick="startQuiz()">Start Quiz</button>
+    </div>
+    `}
+  `;
+}
+
+let selectedMode = 'immediate';
+let selectedOrder = 'exam';
+const ALL_DOMAINS = Object.keys(DOMAINS).sort();
+let selectedDomains = new Set(ALL_DOMAINS);
+let selectedCount = null; // null = every question in the selected domains
+
+function domainCount(d) { return QUESTIONS.filter(q => String(q.domain) === String(d)).length; }
+function poolSize() { return QUESTIONS.filter(q => selectedDomains.has(String(q.domain))).length; }
+
+function toggleDomain(d, on) {
+  if (on) selectedDomains.add(String(d)); else selectedDomains.delete(String(d));
+  updateSelectionUi();
+}
+
+function toggleAllDomains(on) {
+  selectedDomains = new Set(on ? ALL_DOMAINS : []);
+  updateSelectionUi();
+}
+
+function setCount(v) {
+  const n = parseInt(v, 10);
+  selectedCount = (isNaN(n) || n < 1) ? null : Math.min(n, poolSize());
+}
+
+function updateSelectionUi() {
+  const n = poolSize();
+  if (selectedCount && selectedCount > n) selectedCount = n || null;
+  const byId = id => document.getElementById(id);
+  ALL_DOMAINS.forEach(d => { const c = byId('dom-' + d); if (c) c.checked = selectedDomains.has(d); });
+  const all = byId('dom-all'); if (all) all.checked = selectedDomains.size === ALL_DOMAINS.length;
+  const inp = byId('count-input');
+  if (inp) { inp.max = n; inp.placeholder = n ? 'All ' + n : ''; inp.value = selectedCount || ''; }
+  const av = byId('count-avail'); if (av) av.textContent = 'of ' + n + ' available. Leave blank for all. A smaller number is drawn at random from the selected domains.';
+  const w = byId('domain-warn'); if (w) w.style.display = n ? 'none' : 'block';
+  const sb = byId('start-btn'); if (sb) sb.disabled = (n === 0 && selectedMode !== 'mock');
+}
+
+function domainLabel(list) {
+  if (!Array.isArray(list) || list.length === 0 || list.length === ALL_DOMAINS.length) return '';
+  return (list.length === 1 ? 'Domain ' : 'Domains ') + list.join(', ') + ' only, ';
+}
+
+function selectOrder(o) {
+  selectedOrder = o;
+  document.getElementById('order-exam').classList.toggle('selected', o === 'exam');
+  document.getElementById('order-shuffled').classList.toggle('selected', o === 'shuffled');
+}
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.getElementById('mode-immediate').classList.toggle('selected', mode === 'immediate');
+  document.getElementById('mode-later').classList.toggle('selected', mode === 'later');
+  document.getElementById('mode-mock').classList.toggle('selected', mode === 'mock');
+  document.getElementById('order-cards').style.display = mode === 'mock' ? 'none' : '';
+  document.getElementById('domain-pick').style.display = mode === 'mock' ? 'none' : '';
+  updateSelectionUi();
+}
+
+function resumeQuiz() {
+  state = loadState();
+  render();
+}
+
+function newQuiz() {
+  clearState();
+  render();
+}
+
+function startQuiz() {
+  const mock = selectedMode === 'mock';
+  if (!mock && poolSize() === 0) return;
+  const ids = mock ? pickMock() : pickQuestions(new Set(), selectedCount || poolSize());
+  state = {
+    screen: 'question',
+    mode: mock ? 'later' : selectedMode,
+    mock: mock,
+    domainFilter: mock ? ALL_DOMAINS.slice() : ALL_DOMAINS.filter(d => selectedDomains.has(d)),
+    startedAt: Date.now(),
+    pausesUsed: 0,
+    pausedAt: null,
+    pausedTotal: 0,
+    deadline: mock ? Date.now() + MOCK_MINUTES * 60000 : null,
+    questionIds: ids,
+    usedIds: ids.slice(),
+    currentIndex: 0,
+    answers: {},
+    locked: {},
+    submitted: false,
+    resultsOffset: 0,
+    flagged: {},
+    struck: {},
+    resultsFilter: 'incorrect',
+  };
+  saveState();
+  render();
+}
+
+// --- Question screen ---
+function renderQuestion() {
+  const idx = state.currentIndex;
+  const id = state.questionIds[idx];
+  const q = getQuestion(id);
+  const total = state.questionIds.length;
+  const userAnswer = state.answers[id];
+  const isImmediate = state.mode === 'immediate';
+  const isAnswered = isComplete(q, userAnswer);
+  const picked = asArray(userAnswer);
+  const correctList = correctArray(q);
+  const multi = !!q.multi;
+  const isLocked = isImmediate && !!(state.locked?.[id]);
+
+  const pct = Math.round(((idx + 1) / total) * 100);
+
+  const struckList = asArray(state.struck && state.struck[id]);
+  let optionsHtml = q.options.map((opt, i) => {
+    const letter = indexToLetter(i);
+    let cls = 'option-label';
+    const isStruck = struckList.includes(letter);
+    if (isStruck) cls += ' struck';
+    if (isLocked) {
+      cls += ' locked';
+      if (correctList.includes(letter)) cls += ' correct';
+      else if (picked.includes(letter)) cls += ' incorrect';
+    }
+    const checked = picked.includes(letter) ? 'checked' : '';
+    const disabled = isLocked ? 'disabled' : '';
+    return `
+      <div class="option-row">
+        <label class="${cls}">
+          <input type="${multi ? 'checkbox' : 'radio'}" name="option" value="${letter}" ${checked} ${disabled} onchange="selectAnswer('${letter}')">
+          <span class="option-letter">${letter}</span>
+          <span class="option-text">${escHtml(opt)}</span>
+          <button type="button" class="strike-btn${isStruck ? ' on' : ''}" ${disabled} aria-pressed="${isStruck}" aria-label="${isStruck ? 'Restore' : 'Strike out'} option ${letter}" title="${isStruck ? 'Restore this answer' : 'Strikethrough this answer'}" onclick="event.preventDefault(); event.stopPropagation(); toggleStrike('${letter}')"><span class="strike-ab" aria-hidden="true">ab</span></button>
+        </label>
+      </div>
+    `;
+  }).join('');
+
+  let explanationHtml = '';
+  if (isImmediate && isLocked && q.explanation) {
+    explanationHtml = `<div class="explanation visible">${escHtml(q.explanation)}</div>`;
+  }
+
+  const submitBtn = isImmediate ? `<button class="btn btn-primary" onclick="submitAnswer()" ${!isAnswered || isLocked ? 'disabled' : ''}>Submit Answer</button>` : '';
+
+  const prevDisabled = idx === 0 ? 'disabled' : '';
+  const isLast = idx === total - 1;
+  const nextLabel = isLast ? 'Review Answers' : 'Next';
+  const nextDisabled = (isImmediate && !isLocked) ? 'disabled' : '';
+
+  const flagged = isFlagged(id);
+  const otherMarked = state.questionIds.filter(x => x !== id && isFlagged(x)).length;
+  const allAnswered = state.questionIds.every(x => isComplete(getQuestion(x), state.answers[x]));
+  const allHandled = state.questionIds.every(x => isFlagged(x) || isComplete(getQuestion(x), state.answers[x]));
+  const flagBtn = `<button type="button" class="flag-btn${flagged ? ' on' : ''}" aria-pressed="${flagged}" onclick="toggleFlag(${id})">${flagged ? '\u2691 Marked for review' : '\u2690 Mark for review'}</button>`;
+  const tagsHtml = `<div class="tags"><span class="tag">Q${q.ref}</span><span class="tag">Domain ${q.domain}: ${escHtml(DOMAINS[q.domain])} (${DOMAIN_WEIGHTS[q.domain]}%)</span><span class="tag${multi ? ' multi' : ''}">${multi ? 'Select ' + correctList.length : 'Select one'}</span>${flagBtn}</div>`;
+
+  return `
+    <div class="progress-label">
+      <span>Question ${idx + 1} / ${total}</span>
+      ${timerRowHtml()}
+      <span>${state.questionIds.filter(i => isComplete(getQuestion(i), state.answers[i])).length} answered${flaggedCount() ? ', ' + flaggedCount() + ' marked' : ''}</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    <div class="card">
+      ${tagsHtml}
+      <p class="question-text">${escHtml(q.question)}</p>
+      <div class="options">${optionsHtml}</div>
+      ${explanationHtml}
+      ${nextHintId === id ? '<div class="next-hint" role="alert">Select an answer or mark this question for review before moving on.</div>' : ''}
+      <div class="nav-actions">
+        <button class="btn btn-secondary" onclick="prevQuestion()" ${prevDisabled}>← Prev</button>
+        ${submitBtn}
+        ${otherMarked && allHandled ? `<button class="btn btn-secondary" onclick="goToNextMarked()">Next marked (${otherMarked}) \u2691</button>` : ''}
+        <button class="btn btn-primary" onclick="nextQuestion()" ${nextDisabled}>${nextLabel}</button>
+        ${allAnswered ? `<button class="btn btn-secondary" onclick="backToReview()">Back to Review</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function selectAnswer(letter) {
+  nextHintId = null;
+  const id = state.questionIds[state.currentIndex];
+  if (state.locked?.[id]) return;
+  const q = getQuestion(id);
+  clearStrike(id, letter); // choosing an option un-strikes it
+  if (q.multi) {
+    let cur = asArray(state.answers[id]);
+    if (cur.includes(letter)) cur = cur.filter(x => x !== letter);
+    else if (cur.length < correctArray(q).length) cur.push(letter);
+    else cur = cur.slice(1).concat(letter); // swap oldest pick out at the limit
+    state.answers[id] = cur;
+  } else {
+    state.answers[id] = letter;
+  }
+  saveState();
+  render();
+}
+
+// --- Strike out (rule out) answer options ---
+function clearStrike(id, letter) {
+  if (state.struck && state.struck[id]) {
+    state.struck[id] = state.struck[id].filter(x => x !== letter);
+    if (!state.struck[id].length) delete state.struck[id];
+  }
+}
+
+function toggleStrike(letter) {
+  const id = state.questionIds[state.currentIndex];
+  if (state.locked?.[id]) return;
+  if (!state.struck) state.struck = {};
+  const cur = asArray(state.struck[id]);
+  if (cur.includes(letter)) {
+    clearStrike(id, letter);
+  } else {
+    state.struck[id] = cur.concat(letter);
+    // ruling an option out also deselects it
+    const a = asArray(state.answers[id]).filter(x => x !== letter);
+    if (a.length) state.answers[id] = a; else delete state.answers[id];
+  }
+  saveState();
+  render();
+}
+
+function submitAnswer() {
+  const id = state.questionIds[state.currentIndex];
+  if (!isComplete(getQuestion(id), state.answers[id])) return;
+  if (!state.locked) state.locked = {};
+  state.locked[id] = true;
+  saveState();
+  render();
+}
+
+// Next / Review Answers is blocked until the question is answered or marked for review
+let nextHintId = null;
+function nextQuestion() {
+  const idx = state.currentIndex;
+  const total = state.questionIds.length;
+  const id = state.questionIds[idx];
+  if (!isComplete(getQuestion(id), state.answers[id]) && !isFlagged(id)) {
+    nextHintId = id;
+    render();
+    return;
+  }
+  nextHintId = null;
+  if (idx < total - 1) {
+    state.currentIndex++;
+    saveState();
+    render();
+  } else {
+    state.screen = 'summary';
+    saveState();
+    render();
+  }
+}
+
+function prevQuestion() {
+  nextHintId = null;
+  if (state.currentIndex > 0) {
+    state.currentIndex--;
+    saveState();
+    render();
+  }
+}
+
+function confirmReset() {
+  if (confirm('Reset quiz? All progress will be lost.')) {
+    clearState();
+    selectedMode = 'immediate';
+    selectedDomains = new Set(ALL_DOMAINS);
+    selectedCount = null;
+    render();
+  }
+}
+
+// --- Summary screen (Later mode) ---
+function renderSummary() {
+  const items = state.questionIds.map((id, i) => {
+    const q = getQuestion(id);
+    const ans = state.answers[id];
+    const ansHtml = asArray(ans).length
+      ? `<span class="summary-ans${isComplete(q, ans) ? '' : ' unanswered'}">${ansLabel(ans)}</span>`
+      : `<span class="summary-ans unanswered">—</span>`;
+    return `
+      <li class="summary-item" onclick="goToQuestion(${i})" style="cursor:pointer">
+        <span class="summary-flag" title="${isFlagged(id) ? 'Marked for review' : ''}">${isFlagged(id) ? '\u2691' : ''}</span>
+        <span class="summary-qnum">Q${i+1}</span>
+        <span class="summary-qtext">${escHtml(q.question.substring(0, 80))}${q.question.length > 80 ? '…' : ''}</span>
+        ${ansHtml}
+      </li>
+    `;
+  }).join('');
+
+  const answered = state.questionIds.filter(i => isComplete(getQuestion(i), state.answers[i])).length;
+  const total = state.questionIds.length;
+
+  return `
+    <h2>Review Your Answers</h2>
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:16px">${answered}/${total} answered.${flaggedCount() ? ' ' + flaggedCount() + ' marked for review (\u2691).' : ''} Click a question to change your answer.</p>
+    ${state.mock ? `<div style="margin-bottom:16px;font-size:14px;color:var(--text-dim)">${timerRowHtml()}</div>` : ''}
+    <div class="card" style="padding:8px 16px">
+      <ul class="summary-list">${items}</ul>
+    </div>
+    <div class="summary-actions">
+      <button class="btn btn-primary" onclick="submitAll()">Submit All</button>
+      ${flaggedCount() ? `<button class="btn btn-secondary" onclick="goToFirstMarked()">Go to first marked (${flaggedCount()})</button>` : ''}
+    </div>
+  `;
+}
+
+function goToQuestion(idx) {
+  nextHintId = null;
+  state.screen = 'question';
+  state.currentIndex = idx;
+  saveState();
+  render();
+}
+
+function submitAll() {
+  state.screen = 'results';
+  state.submitted = true;
+  if (!state.finishedAt) state.finishedAt = Date.now();
+  state.resultsOffset = 0;
+  state.resultsFilter = 'incorrect';
+  saveState();
+  render();
+}
+
+// --- Results screen ---
+const RESULTS_PAGE = 20;
+
+function renderResults() {
+  const total = state.questionIds.length;
+  let score = 0;
+  const byDomain = {};
+  state.questionIds.forEach(id => {
+    const q = getQuestion(id);
+    if (isCorrect(q, state.answers[id])) score++;
+    const d = q.domain;
+    byDomain[d] = byDomain[d] || { right: 0, total: 0 };
+    byDomain[d].total++;
+    if (isCorrect(q, state.answers[id])) byDomain[d].right++;
+  });
+
+  const pct = Math.round((score / total) * 100);
+  const offset = state.resultsOffset || 0;
+  const filter = state.resultsFilter || 'incorrect';
+  const wrongCount = total - score;
+  const markedCount = flaggedCount();
+  const entries = state.questionIds.map((id, i) => ({ id, n: i + 1 })).filter(e => {
+    if (filter === 'all') return true;
+    if (filter === 'marked') return isFlagged(e.id);
+    return !isCorrect(getQuestion(e.id), state.answers[e.id]);
+  });
+  const visible = entries.slice(0, offset + RESULTS_PAGE);
+  const filterNote = filter === 'all' ? 'all questions' : filter === 'marked' ? 'questions you marked for review' : 'incorrect and unanswered questions';
+  const emptyMsg = filter === 'marked' ? 'No questions were marked for review.' : 'No incorrect answers. Every question was answered correctly.';
+
+  const items = visible.map(({ id, n }) => {
+    const q = getQuestion(id);
+    const userAns = state.answers[id];
+    const isRight = isCorrect(q, userAns);
+    const fmt = arr => arr.map(l => `${l}: ${escHtml(q.options[letterToIndex(l)])}`).join('<br>');
+    const userAnsText = asArray(userAns).length ? fmt(asArray(userAns).slice().sort()) : '(not answered)';
+    const correctAnsText = fmt(correctArray(q));
+    return `
+      <li class="result-item">
+        <div class="result-qtext"><strong>Q${n}</strong> <span style="color:var(--text-dim)">(${q.ref}, Domain ${q.domain})</span> ${isFlagged(id) ? '<span class="tag flag">\u2691 Marked</span> ' : ''}${escHtml(q.question)}</div>
+        <div class="result-answers">
+          <span><span class="result-ans-label">Your answer: </span><span class="result-user-ans ${isRight ? 'right' : 'wrong'}">${userAnsText}</span></span>
+          ${!isRight ? `<span><span class="result-ans-label">Correct: </span><span class="result-correct-ans">${correctAnsText}</span></span>` : ''}
+        </div>
+        ${q.explanation ? `<div class="result-explanation">${escHtml(q.explanation)}</div>` : ''}
+      </li>
+    `;
+  }).join('');
+
+  const hasMore = visible.length < entries.length;
+
+  return `
+    <div class="card score-card">
+      <div class="score-big">${score}/${total}</div>
+      <div class="score-sub">${pct}% correct</div>
+      ${state.mock ? `<div class="score-sub" style="margin-top:8px">Mock exam: ${state.timedOut ? 'time expired' : 'finished in ' + fmtTime(state.finishedAt - state.startedAt - (state.pausedTotal || 0))} of ${MOCK_MINUTES} minutes, ${state.pausesUsed || 0} of ${MAX_PAUSES} pauses used. The real exam reports a scaled score (pass mark 720 of 1,000), which cannot be worked out from a percentage.</div>` : ''}
+    </div>
+    <h2>Score by domain</h2>
+    <div class="card" style="padding:8px 16px">
+      ${Object.keys(byDomain).sort().map(d => { const b = byDomain[d]; const p = Math.round(b.right / b.total * 100); return `<div class="domain-row"><span>Domain ${d}: ${escHtml(DOMAINS[d])} (${DOMAIN_WEIGHTS[d]}%)</span><span class="pct ${p >= 75 ? 'ok' : 'low'}">${b.right}/${b.total} (${p}%)</span></div>`; }).join('')}
+    </div>
+    <h2>Question Breakdown</h2>
+    <div class="filter-bar">
+      <button class="filter-btn${filter === 'incorrect' ? ' active' : ''}" onclick="setResultsFilter('incorrect')">Incorrect (${wrongCount})</button>
+      <button class="filter-btn${filter === 'marked' ? ' active' : ''}" onclick="setResultsFilter('marked')">Marked for review (${markedCount})</button>
+      <button class="filter-btn${filter === 'all' ? ' active' : ''}" onclick="setResultsFilter('all')">All (${total})</button>
+    </div>
+    <p class="filter-note">Showing ${filterNote}. Unanswered questions count as incorrect.</p>
+    <div class="card" style="padding:8px 16px">
+      ${entries.length ? `<ul class="results-list">${items}</ul>` : `<div class="empty-note">${emptyMsg}</div>`}
+      ${hasMore ? `<div class="results-load-more"><button class="btn btn-secondary" onclick="loadMoreResults()">Load More (${entries.length - visible.length} remaining)</button></div>` : ''}
+    </div>
+    <div class="results-actions">
+      <button class="btn btn-primary" onclick="confirmReset()">Start New Quiz</button>
+    </div>
+  `;
+}
+
+function setResultsFilter(f) {
+  state.resultsFilter = f;
+  state.resultsOffset = 0;
+  saveState();
+  render();
+}
+
+function loadMoreResults() {
+  state.resultsOffset = (state.resultsOffset || 0) + RESULTS_PAGE;
+  saveState();
+  render();
+}
+
+// --- Helpers ---
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function attachHandlers() {
+  // radio inputs rendered with onchange inline, nothing extra needed
+}
+
+// --- Boot ---
+render();
+</script>
+</body>
+</html>
